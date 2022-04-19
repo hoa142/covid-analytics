@@ -1,0 +1,66 @@
+name: Covid Analytics GitHub Actions
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  code-quality-checking:
+    runs-on: [self-hosted]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.name }} ${{ runner.os }} self-hosted server."
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
+      - name: ⚡ Check out repository code
+        uses: actions/checkout@v2
+
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: 📄 List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: ✅ Code format checking with Black
+        run: /home/ubuntu/.virtualenvs/githubenv/bin/black --check .
+
+      - name: ✅ Import order checking with Isort
+        run: /home/ubuntu/.virtualenvs/githubenv/bin/isort --check .
+
+      - name: ✅ Code style checking with Flake8
+        run: /home/ubuntu/.virtualenvs/githubenv/bin/flake8
+
+      - name: ✅ Static type checking with Mypy
+        run: |
+          /home/ubuntu/.virtualenvs/githubenv/bin/mypy airflow
+
+      - name: ✅ Doc style checking with Pydocstyle
+        run: /home/ubuntu/.virtualenvs/githubenv/bin/pydocstyle
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  code-pushing:
+    runs-on: [self-hosted]
+    if: github.event_name == 'push'
+    steps:
+    - name: ✨ Get environment variables
+      run: |
+        source ~/.bash_profile
+        echo $ENV
+        echo $AIRFLOW_IP
+        echo "env=$ENV" >> $GITHUB_ENV
+        echo "airflow_ip=$AIRFLOW_IP" >> $GITHUB_ENV
+
+    - name: ⚡ Check out repository code
+      uses: actions/checkout@v2
+
+    - name: ♻️ Synchronize Airflow dags and plugins to a server
+      run: |
+        rsync -av --exclude '*__pycache__*' --delete airflow/dags/ ubuntu@${{ env.airflow_ip }}:/home/ubuntu/airflow/dags
+        rsync -av --exclude '*__pycache__*' --delete airflow/plugins/ ubuntu@${{ env.airflow_ip }}:/home/ubuntu/airflow/plugins
+
+    - run: echo "🍏 This job's status is ${{ job.status }}."

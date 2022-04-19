@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "covid-analytics"
+version = "1.0"
+description = "Covid cases numbers analytics"
+authors = ["hoatran142@outlook.com"]
+
+[tool.poetry.dependencies]
+python = "3.9"
+apache-airflow = {extras = ["amazon"], version = "^2.2.3"}
+types-requests = "^2.27.11"
+types-python-dateutil = "^2.8.9"
+boto3 = "^1.21.9"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+isort = "^5.10.1"
+mypy = "^0.931"
+flake8 = "^4.0.1"
+pep8-naming = "^0.12.1"
+pylint = "^2.12.2"
+pydocstyle = "^6.1.1"
+pre-commit = "^2.17.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pylint.LOGGING]
+disable = "logging-fstring-interpolation"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = ["import-error", "wrong-import-order", "ungrouped-imports", "pointless-statement"]
+max-line-length = 120
+
+[tool.pydocstyle]
+ignore = ["D104", "D107", "D212", "D203"]
